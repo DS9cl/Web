@@ -29,6 +29,7 @@ const readData = () => JSON.parse(fs.readFileSync(DATA_PATH));
 const writeData = (data) => fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
 
 // --- REST API ---
+
 app.post("/login", (req, res) => {
   const { username } = req.body;
   if (!username) return res.status(400).send("Username required");
@@ -69,6 +70,7 @@ app.get("/messages/:serverId/:channelId", (req, res) => {
 });
 
 // --- WebSocket ---
+
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
@@ -89,6 +91,15 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => console.log("User disconnected:", socket.id));
 });
 
-// Render-ready port
+// --- Serve React frontend ---
+
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+
+// --- Start server ---
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
